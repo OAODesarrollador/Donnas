@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #FDFBF7;
+  --color-foreground: #2A1B14;
+  --color-brand-cream: #FDFBF7;
+  --color-brand-cacao: #2A1B14;
+  --color-brand-hazelnut: #8B5E3C;
+  --color-brand-beige: #EADBC8;
+  --color-brand-pink: #F3D2C9;
+  --color-brand-pink-dark: #E4A493;
+  --color-brand-chocolate: #4E3629;
+  --color-brand-marshmallow: #FFF5F5;
+  --font-sans: var(--font-sans), sans-serif;
+  --font-serif: var(--font-serif), serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #FDFBF7;
+  --foreground: #2A1B14;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FDFBF7;
+  color: #2A1B14;
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fluid / Liquid Animations */
+.liquid-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transform: translateZ(0);
+}
+
+.liquid-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  height: 140%;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.liquid-btn:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0s;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FDFBF7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EADBC8;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5E3C;
+}
+
+/* Utility to hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* iOS bounce emulation */
+.ios-bounce {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+}
+.ios-bounce:active {
+  transform: scale(0.96);
 }

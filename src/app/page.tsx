@@ -1,65 +1,85 @@
-import Image from "next/image";
+import React from "react";
+import { db } from "@/lib/db";
+import { MainShop } from "./MainShop";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+// Indica a Next.js que revalide esta ruta en cada request (consultas en vivo a la DB)
+export const revalidate = 0;
+
+export default async function Home() {
+  let dbProducts = [];
+
+  try {
+    // Consulta directa a la base de datos PostgreSQL en el servidor
+    dbProducts = await db.product.findMany({
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+  } catch (error) {
+    console.error("⚠️ Error consultando PostgreSQL (Usando fallback de desarrollo):", error);
+    
+    // Fallback robusto en desarrollo si la base de datos no está levantada o configurada aún en .env
+    dbProducts = [
+      {
+        id: "combo-1",
+        name: "Combo Glaseado Real",
+        price: 14500,
+        description: "Caja de 6 Donuts Premium a elección + 2 Specialty Iced Lattes. Ideal para compartir un momento de ensueño.",
+        image: "/assets/donut_combo.png",
+        category: "combos",
+        badge: "Recomendado",
+        isPopular: true,
+      },
+      {
+        id: "box-12",
+        name: "Caja Central x12",
+        price: 21000,
+        description: "Nuestra caja estrella con 12 de nuestras mejores donuts artesanales surtidas. Presentadas en caja craft de diseño premium.",
+        image: "/assets/donut_box_12.png",
+        category: "cajas",
+        badge: "Más Vendido",
+        isPopular: true,
+      },
+      {
+        id: "box-6",
+        name: "Caja Premium x6",
+        price: 12000,
+        description: "Selección personalizada de 6 donuts artesanales de sabor único. Horneadas, glaseadas y decoradas hoy.",
+        image: "/assets/donut_box_6.png",
+        category: "cajas",
+        isPopular: false,
+      },
+      {
+        id: "donut-ferrero",
+        name: "Donut Ferrero Rocher",
+        price: 2400,
+        description: "Relleno premium de crema de avellanas (Nutella), bañado en chocolate belga y coronado con avellanas tostadas picadas.",
+        image: "grad-chocolate",
+        category: "donuts",
+        badge: "Gourmet",
+        isPopular: true,
+      },
+      {
+        id: "donut-ddl",
+        name: "Donut Tentación de DDL",
+        price: 2300,
+        description: "Rellena de abundante dulce de leche argentino clásico de repostería, glaseado de vainilla y líneas de chocolate fino.",
+        image: "grad-caramel",
+        category: "donuts",
+        isPopular: false,
+      },
+      {
+        id: "drink-macchiato",
+        name: "Iced Caramel Macchiato",
+        price: 3500,
+        description: "Café de especialidad de origen colombiano, leche cremosa fría y abundante jarabe de caramelo artesanal líquido.",
+        image: "grad-coffee-1",
+        category: "bebidas",
+        isPopular: false,
+      }
+    ];
+  }
+
+  // Renderiza el componente cliente e inyecta los productos cargados del servidor
+  return <MainShop products={dbProducts} />;
 }

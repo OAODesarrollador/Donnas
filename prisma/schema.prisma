@@ -1,0 +1,23 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Int      // Almacenado como entero en ARS (ej. 14500)
+  description String
+  image       String   // Ruta en public/assets o gradiente CSS
+  category    String   // "combos", "cajas", "donuts", "bebidas"
+  badge       String?  // Etiqueta opcional (ej. "Más Vendido")
+  isPopular   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
