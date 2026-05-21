@@ -22,7 +22,23 @@
 
 # misc
 .DS_Store
+Thumbs.db
+desktop.ini
 *.pem
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Markdown files (Only README.md/readme.md should be tracked)
+*.md
+!README.md
+!readme.md
 
 # debug
 npm-debug.log*
@@ -32,6 +48,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
