@@ -4,6 +4,7 @@ import React from "react";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Phone, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { BusinessInfo } from "@/lib/shopTypes";
 
 const Instagram = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -24,7 +25,11 @@ const Instagram = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const BottomNavBar: React.FC = () => {
+interface BottomNavBarProps {
+  businessInfo: BusinessInfo;
+}
+
+export const BottomNavBar: React.FC<BottomNavBarProps> = ({ businessInfo }) => {
   const { cartCount, cartSubtotal, setIsCartOpen } = useCart();
 
   // Scroll to catalog helper
@@ -95,7 +100,7 @@ export const BottomNavBar: React.FC = () => {
 
               {/* Instagram Shortcut */}
               <a
-                href="https://www.instagram.com/centraldonuts00/"
+                href={businessInfo.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-1 active:scale-95 transition-transform cursor-pointer"
@@ -106,7 +111,7 @@ export const BottomNavBar: React.FC = () => {
 
               {/* WhatsApp Help Shortcut */}
               <a
-                href="https://wa.me/5491123456789"
+                href={`https://wa.me/${businessInfo.whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-1 active:scale-95 transition-transform cursor-pointer"

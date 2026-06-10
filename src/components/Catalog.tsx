@@ -5,41 +5,27 @@ import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Star, Coffee, Sparkles } from "lucide-react";
 import Image from "next/image";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  badge?: string | null;
-  isPopular?: boolean;
-}
+import type { ShopCategory, ShopProduct } from "@/lib/shopTypes";
+import { isPhotoImage } from "@/lib/imageUtils";
 
 interface CatalogProps {
-  products: Product[];
+  products: ShopProduct[];
+  categories: ShopCategory[];
 }
 
-export const Catalog: React.FC<CatalogProps> = ({ products }) => {
+export const Catalog: React.FC<CatalogProps> = ({ products, categories }) => {
   const { addToCart } = useCart();
   const [activeCategory, setActiveCategory] = useState<string>("todos");
 
-  const categories = [
-    { id: "todos", name: "Todos" },
-    { id: "combos", name: "Combos" },
-    { id: "cajas", name: "Cajas" },
-    { id: "donuts", name: "Donuts" },
-    { id: "bebidas", name: "Bebidas" },
-  ];
+  const categoryTabs = [{ slug: "todos", name: "Todos" }, ...categories];
 
   const filteredProducts = activeCategory === "todos"
     ? products
     : products.filter((p) => p.category === activeCategory);
 
   // Renders a modern CSS glassmorphic aesthetic gradient card for non-photo items
-  const renderCardVisual = (product: Product) => {
-    if (product.image.startsWith("/assets")) {
+  const renderCardVisual = (product: ShopProduct) => {
+    if (isPhotoImage(product.image)) {
       return (
         <div className="relative w-full h-full">
           <Image
@@ -104,12 +90,12 @@ export const Catalog: React.FC<CatalogProps> = ({ products }) => {
 
         {/* Categories Tabs Selector */}
         <div className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-2.5 pb-2">
-          {categories.map((cat) => (
+          {categoryTabs.map((cat) => (
             <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              key={cat.slug}
+              onClick={() => setActiveCategory(cat.slug)}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 whitespace-nowrap active:scale-95 cursor-pointer select-none ${
-                activeCategory === cat.id
+                activeCategory === cat.slug
                   ? "bg-brand-cacao text-brand-cream shadow-[0_6px_16px_rgba(42,27,20,0.12)]"
                   : "bg-white text-brand-cacao/75 hover:bg-brand-beige/25 border border-brand-cacao/5"
               }`}
@@ -177,7 +163,7 @@ export const Catalog: React.FC<CatalogProps> = ({ products }) => {
                         id: product.id,
                         name: product.name,
                         price: product.price,
-                        image: product.image.startsWith("/assets") ? product.image : "/assets/donut_box_6.png", // fallback image in cart
+                        image: isPhotoImage(product.image) ? product.image : "/assets/donut_box_6.png",
                         category: product.category,
                         description: product.description
                       })}

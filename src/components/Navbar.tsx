@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import type { BusinessInfo } from "@/lib/shopTypes";
 
 const Instagram = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -24,7 +26,11 @@ const Instagram = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  businessInfo: BusinessInfo;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ businessInfo }) => {
   const { setIsCartOpen, cartCount, cartSubtotal } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -37,8 +43,21 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#FDFBF7]/80 backdrop-blur-md border-b border-brand-cacao/5 py-4 px-6 md:px-12 transition-all duration-300">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-40 h-17.5 w-full overflow-visible  bg-transparent px-6 transition-all duration-300 md:h-37.5 md:px-12">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-0 h-30 w-full select-none md:h-45"
+        >
+          <Image
+            src="/assets/FondoNav.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-fill"
+          />
+        </span>
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl -translate-y-10 items-center justify-between">
           {/* Logo Brand */}
           <a href="#" className="flex items-center gap-2 group">
             <span className="font-serif text-xl md:text-2xl font-bold tracking-tight text-brand-cacao flex items-center gap-1.5">
@@ -126,7 +145,7 @@ export const Navbar: React.FC = () => {
 
             <div className="mt-auto flex flex-col gap-4 mb-16">
               <a
-                href="https://www.instagram.com/centraldonuts00/"
+                href={businessInfo.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-3 bg-white border border-brand-cacao/10 text-brand-cacao py-4 rounded-2xl font-semibold shadow-sm active:scale-95 transition-transform"
@@ -135,7 +154,7 @@ export const Navbar: React.FC = () => {
                 Seguinos en Instagram
               </a>
               <a
-                href="https://wa.me/5491123456789"
+                href={`https://wa.me/${businessInfo.whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-3 bg-green-50 text-green-700 border border-green-100 py-4 rounded-2xl font-semibold shadow-sm active:scale-95 transition-transform"

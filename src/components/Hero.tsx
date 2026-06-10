@@ -1,12 +1,50 @@
 "use client";
 
-import React from "react";
-import { Button } from "./ui/Button";
-import { Phone, ArrowDown } from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useRef } from "react";
+import { ArrowDown, Sparkles } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
+import { Button } from "./ui/Button";
+
+const heroSlides = [
+  {
+    eyebrow: "100% artesanales",
+    title: "Tus donuts favoritas, ahora online.",
+    description:
+      "Gourmet, frescas y horneadas hoy. Pedí en segundos y retirá o recibilo en casa.",
+    image: "/assets/hero_donuts.png",
+    alt: "Donuts artesanales surtidas con glaseados premium",
+  },
+  {
+    eyebrow: "Cajas para compartir",
+    title: "Armá una caja dulce para cualquier momento.",
+    description:
+      "Elegí combinaciones listas para regalar, llevar a una juntada o resolver el antojo del día.",
+    image: "/assets/donut_box_12.png",
+    alt: "Caja de doce donuts artesanales",
+  },
+  {
+    eyebrow: "Combos con café",
+    title: "Donuts y bebidas frías en un solo pedido.",
+    description:
+      "Sumá lattes, cajas y sabores especiales con una experiencia simple desde el celular.",
+    image: "/assets/donut_combo.png",
+    alt: "Combo de donuts artesanales y bebidas frías",
+  },
+];
+
+const reversedImageSlides = [...heroSlides].reverse();
 
 export const Hero: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-66.666%"]);
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "66.666%"]);
+
   const handleScrollToMenu = () => {
     const element = document.getElementById("menu");
     if (element) {
@@ -15,98 +53,79 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center py-12 px-6 md:px-12 overflow-hidden bg-gradient-to-b from-[#FDFBF7] to-[#FAF6F0]">
-      {/* Editorial aesthetic background shapes */}
-      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-brand-pink/15 rounded-full filter blur-[100px] pointer-events-none -mr-20 -mt-20" />
-      <div className="absolute bottom-0 left-0 w-[30vw] h-[30vw] bg-brand-beige/25 rounded-full filter blur-[80px] pointer-events-none -ml-20 -mb-20" />
+    <section
+      ref={sectionRef}
+      className="relative min-h-[210vh] bg-brand-cream"
+    >
+      <div className="sticky top-17.5 flex min-h-[calc(100vh-4.375rem)] items-center py-8 overflow-hidden px-5 pb-24 sm:px-8 md:top-37.5 md:min-h-[calc(100vh-9.375rem)] lg:px-12">
+        <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-7 lg:grid-cols-2 lg:gap-16">
+          <div className="relative h-90 overflow-hidden sm:h-107.5 lg:h-130">
+            <motion.div style={{ y: textY }} className="h-[300%]">
+              {heroSlides.map((slide, index) => (
+                <article
+                  key={slide.title}
+                  className="flex h-1/3 flex-col justify-center gap-5 text-center lg:items-start lg:text-left"
+                >
+                  <div className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-brand-pink-dark/30 bg-white/65 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cacao shadow-[0_8px_28px_rgba(42,27,20,0.06)] backdrop-blur lg:mx-0">
+                    <Sparkles className="h-3.5 w-3.5 text-brand-hazelnut" />
+                    {slide.eyebrow}
+                  </div>
 
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-        
-        {/* Left Column: Premium Copywriting */}
-        <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left gap-6 md:gap-8">
-          
-          {/* Micro-badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 bg-brand-pink/35 border border-brand-pink-dark/25 px-4 py-1.5 rounded-full text-brand-cacao font-semibold text-xs tracking-wider uppercase"
-          >
-            🍩 100% Artesanales & Gourmet
-          </motion.div>
+                  {index === 0 ? (
+                    <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-tight text-brand-cacao sm:text-5xl lg:text-6xl">
+                      {slide.title}
+                    </h1>
+                  ) : (
+                    <h2 className="font-serif text-4xl font-bold leading-[1.05] tracking-tight text-brand-cacao sm:text-5xl lg:text-6xl">
+                      {slide.title}
+                    </h2>
+                  )}
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-cacao leading-[1.1]"
-          >
-            Tus donuts favoritas, <br className="hidden md:inline" />
-            <span className="text-brand-hazelnut relative">
-              ahora online
-              <span className="absolute bottom-1 left-0 w-full h-[4px] bg-brand-pink rounded-full -z-10 opacity-70" />
-            </span>.
-          </motion.h1>
+                  <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-brand-cacao/70 sm:text-lg lg:mx-0">
+                    {slide.description}
+                  </p>
 
-          {/* Subhead */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="text-base md:text-lg text-brand-cacao/70 font-medium leading-relaxed max-w-lg"
-          >
-            Gourmet, frescas y horneadas hoy. Disfrutá de la mejor pastelería desde la comodidad de tu celular. Pedí en 30 segundos y retirá o recibilo en casa.
-          </motion.p>
-
-          {/* Liquid Action CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
-          >
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleScrollToMenu}
-              className="w-full sm:w-auto text-center"
-              icon={<ArrowDown className="w-4 h-4 animate-[bounce_1.5s_infinite]" />}
-            >
-              Hacer Pedido
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full sm:w-auto"
-              onClick={() => window.open("https://wa.me/5491123456789", "_blank")}
-              icon={<Phone className="w-4 h-4 text-green-500 fill-green-500" />}
-            >
-              Consultas WhatsApp
-            </Button>
-          </motion.div>
-
-        </div>
-
-        {/* Right Column: Visual Presentation */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
-          className="lg:col-span-6 flex justify-center"
-        >
-          <div className="relative w-full max-w-[480px] aspect-[4/3] sm:aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(42,27,20,0.15)] border-4 border-white/60 bg-white">
-            <Image
-              src="/assets/hero_donuts.png"
-              alt="Donuts artesanal gourmet premium"
-              fill
-              priority
-              className="object-cover hover:scale-105 transition-transform duration-[2s] ease-out"
-              sizes="(max-w-7xl) 100vw, 500px"
-            />
+                  <div className="flex justify-center lg:justify-start">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={handleScrollToMenu}
+                      className="w-full max-w-55 whitespace-nowrap sm:w-auto"
+                      icon={<ArrowDown className="h-4 w-4 animate-[bounce_1.5s_infinite]" />}
+                    >
+                      Ordenar
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </motion.div>
           </div>
-        </motion.div>
 
+          <div className="relative h-90 overflow-hidden sm:h-107.5 lg:h-130">
+            <motion.div style={{ y: imageY }} className="absolute bottom-0 left-0 h-[300%] w-full">
+              {reversedImageSlides.map((slide, index) => (
+                <div key={slide.image} className="flex h-1/3 items-start justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.7, delay: index * 0.08, ease: "easeOut" }}
+                    className="relative h-full w-full max-w-135 overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_24px_60px_rgba(42,27,20,0.16)]"
+                  >
+                    <Image
+                      src={slide.image}
+                      alt={slide.alt}
+                      fill
+                      priority={slide.image === heroSlides[0].image}
+                      loading={slide.image === heroSlides[0].image ? "eager" : "lazy"}
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 540px"
+                    />
+                  </motion.div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -28,32 +28,38 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [hasLoadedCart, setHasLoadedCart] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
-    try {
-      const storedCart = localStorage.getItem("central_donuts_cart");
-      if (storedCart) {
-        setCart(JSON.parse(storedCart));
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const storedCart = window.localStorage.getItem("central_donuts_cart");
+        if (storedCart) {
+          setCart(JSON.parse(storedCart));
+        }
+      } catch (e) {
+        console.error("Error loading cart from localStorage", e);
+      } finally {
+        setHasLoadedCart(true);
       }
-    } catch (e) {
-      console.error("Error loading cart from localStorage", e);
-    }
-    setIsLoaded(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    if (isLoaded) {
-      try {
-        localStorage.setItem("central_donuts_cart", JSON.stringify(cart));
-      } catch (e) {
-        console.error("Error saving cart to localStorage", e);
-      }
+    if (!hasLoadedCart) {
+      return;
     }
-  }, [cart, isLoaded]);
+
+    try {
+      localStorage.setItem("central_donuts_cart", JSON.stringify(cart));
+    } catch (e) {
+      console.error("Error saving cart to localStorage", e);
+    }
+  }, [cart, hasLoadedCart]);
 
   const addToCart = (item: Omit<CartItem, "quantity">, qty = 1) => {
     setCart((prevCart) => {

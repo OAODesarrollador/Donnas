@@ -5,15 +5,17 @@ import { useCart } from "@/context/CartContext";
 import { X, ArrowRight, CheckCircle2, CreditCard, Landmark, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/Button";
+import type { BusinessInfo } from "@/lib/shopTypes";
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  businessInfo: BusinessInfo;
 }
 
 type CheckoutStep = "form" | "mercado-pago" | "success";
 
-export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, businessInfo }) => {
   const { cart, cartSubtotal, clearCart } = useCart();
   const [step, setStep] = useState<CheckoutStep>("form");
 
@@ -32,6 +34,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   // Error handling
   const [error, setError] = useState("");
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   // Form submission to Payment step
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -52,25 +55,57 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessingPayment(true);
+    setError("");
 
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      setStep("success");
+    setTimeout(async () => {
+      try {
+        const response = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customerName: name,
+            customerPhone: phone,
+            deliveryMethod: delivery === "envio" ? "delivery" : "pickup",
+            deliveryAddress: delivery === "envio" ? address : undefined,
+            items: cart.map((item) => ({
+              productId: item.id,
+              quantity: item.quantity,
+            })),
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error ?? "No se pudo crear la orden.");
+        }
+
+        setOrderId(result.orderId);
+        setStep("success");
+      } catch (paymentError) {
+        setError(paymentError instanceof Error ? paymentError.message : "No se pudo crear la orden.");
+        setStep("form");
+      } finally {
+        setIsProcessingPayment(false);
+      }
     }, 2200); // 2.2 second simulated banking transaction
   };
 
   // WhatsApp redirection
-  const handleSendWhatsApp = () => {
+  const handleSendWhatsApp = async () => {
     const formattedCartItems = cart
       .map((item) => `  • ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString("es-AR")})`)
       .join("\n");
 
-    const message = `*¡Nuevo pedido aprobado en Central Donuts!* 🍩🎉
+    const message = `*¡Nuevo pedido aprobado en ${businessInfo.name}!* 🍩🎉
+${orderId ? `*Orden:* ${orderId}\n` : ""}
 
 *DATOS DE ENTREGA:*
 *Cliente:* ${name}
 *Teléfono:* ${phone}
-*Modalidad:* ${delivery === "envio" ? `Envío a domicilio` : `Retiro en local (Palermo)`}
+*Modalidad:* ${delivery === "envio" ? `Envío a domicilio` : `Retiro en local (${businessInfo.addressLine})`}
 ${delivery === "envio" ? `*Dirección:* ${address}\n` : ""}
 *DETALLE DEL PEDIDO:*
 ${formattedCartItems}
@@ -80,13 +115,27 @@ ${formattedCartItems}
 
 _¡Hola Central Donuts! Acabo de abonar mi pedido seguro en la web. Aguardo confirmación del envío/retiro. ¡Muchas gracias!_`;
 
-    const whatsappUrl = `https://wa.me/5491123456789?text=${encodeURIComponent(message)}`;
+    if (orderId) {
+      await fetch("/api/orders", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId,
+          whatsappMessage: message,
+        }),
+      }).catch(() => undefined);
+    }
+
+    const whatsappUrl = `https://wa.me/${businessInfo.whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
     
     // Clear and close
     clearCart();
     onClose();
     setStep("form");
+    setOrderId(null);
     setName("");
     setPhone("");
     setAddress("");
@@ -225,7 +274,7 @@ _¡Hola Central Donuts! Acabo de abonar mi pedido seguro en la web. Aguardo conf
                           className="bg-white border border-brand-cacao/10 rounded-2xl p-3.5 text-sm focus:outline-none focus:border-brand-hazelnut transition-colors font-medium text-brand-cacao w-full"
                         />
                         <p className="text-[10px] text-brand-hazelnut font-semibold">
-                          * Coordinaremos el costo final del delivery por WhatsApp según tu zona exacta.
+                          * {businessInfo.deliveryNote}
                         </p>
                       </motion.div>
                     )}
@@ -370,6 +419,7 @@ _¡Hola Central Donuts! Acabo de abonar mi pedido seguro en la web. Aguardo conf
                     <h3 className="font-serif text-2xl font-bold text-brand-cacao">¡Pago Aprobado!</h3>
                     <p className="text-xs md:text-sm text-brand-cacao/65 leading-relaxed max-w-xs mx-auto">
                       ¡Excelente, {name}! El pago simulado con Mercado Pago se completó correctamente por un total de *${cartSubtotal.toLocaleString("es-AR")}*.
+                      {orderId ? ` Orden registrada: ${orderId}.` : ""}
                     </p>
                   </div>
 

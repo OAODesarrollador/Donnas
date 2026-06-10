@@ -9,15 +9,186 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OrderStatus {
+  pending
+  paid_simulated
+  sent_to_whatsapp
+  cancelled
+}
+
+enum DeliveryMethod {
+  pickup
+  delivery
+}
+
+enum PromotionType {
+  featured
+  badge
+  discount
+  banner
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products   Product[]
+  promotions Promotion[]
+}
+
 model Product {
   id          String   @id @default(uuid())
   name        String
-  price       Int      // Almacenado como entero en ARS (ej. 14500)
+  price       Int
   description String
-  image       String   // Ruta en public/assets o gradiente CSS
-  category    String   // "combos", "cajas", "donuts", "bebidas"
-  badge       String?  // Etiqueta opcional (ej. "Más Vendido")
+  image       String
+  categorySlug String? @map("category")
+  badge       String?
   isPopular   Boolean  @default(false)
+  isAvailable Boolean  @default(true)
+  stock       Int?
+  sku         String?
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  comboItems      ComboItem[]          @relation("ComboProduct")
+  includedInCombo ComboItem[]          @relation("IncludedProduct")
+  orderItems      OrderItem[]
+  priceHistory    ProductPriceHistory[]
+  promotions      PromotionProduct[]
+
+  @@index([categoryId])
+  @@index([isPopular])
+  @@index([isAvailable])
+}
+
+model Promotion {
+  id              String        @id @default(uuid())
+  slug            String        @unique
+  title           String
+  description     String?
+  type            PromotionType @default(featured)
+  badgeText       String?
+  discountPercent Int?
+  startsAt        DateTime?
+  endsAt          DateTime?
+  isActive        Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  products   PromotionProduct[]
+
+  @@index([isActive])
+  @@index([type])
+  @@index([categoryId])
+}
+
+model PromotionProduct {
+  promotionId String
+  productId   String
+  sortOrder   Int    @default(0)
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([promotionId, productId])
+  @@index([productId])
+}
+
+model ComboItem {
+  comboProductId    String
+  includedProductId String
+  quantity          Int    @default(1)
+
+  comboProduct    Product @relation("ComboProduct", fields: [comboProductId], references: [id], onDelete: Cascade)
+  includedProduct Product @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Restrict)
+
+  @@id([comboProductId, includedProductId])
+  @@index([includedProductId])
+}
+
+model BusinessInfo {
+  id              String   @id @default("main")
+  name            String
+  brandDisplay    String
+  description     String
+  phone           String
+  whatsappNumber  String
+  instagramHandle String
+  instagramUrl    String
+  addressLine     String
+  city            String
+  country         String
+  mapsUrl         String?
+  openingDays     String
+  openingHours    String
+  closedNotice    String?
+  deliveryNote    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  customerName    String
+  customerPhone   String
+  deliveryMethod  DeliveryMethod
+  deliveryAddress String?
+  subtotal        Int
+  deliveryCost    Int?
+  total           Int
+  status          OrderStatus    @default(pending)
+  paymentProvider String?
+  paymentStatus   String?
+  whatsappMessage String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  items OrderItem[]
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id           String @id @default(uuid())
+  orderId      String
+  productId    String?
+  productName  String
+  unitPrice    Int
+  quantity     Int
+  lineTotal    Int
+  productImage String?
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model ProductPriceHistory {
+  id        String   @id @default(uuid())
+  productId String
+  price     Int
+  reason    String?
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
