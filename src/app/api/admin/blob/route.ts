@@ -12,12 +12,15 @@ const sanitizeFileName = (fileName: string) =>
 const isImagePathname = (pathname: string) =>
   IMAGE_EXTENSIONS.some((extension) => pathname.toLowerCase().endsWith(extension));
 
+const getBlobToken = () => process.env.BLOB_READ_WRITE_TOKEN?.trim().replace(/^"|"$/g, "");
+
 export async function GET() {
   if (!(await isAdminSessionValid())) {
     return Response.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const token = getBlobToken();
+  if (!token) {
     return Response.json({
       images: [],
       error: "Vercel Blob no está configurado.",
@@ -25,7 +28,7 @@ export async function GET() {
   }
 
   try {
-    const result = await list({ limit: 100 });
+    const result = await list({ limit: 100, token });
     const images = result.blobs
       .filter((blob) => isImagePathname(blob.pathname))
       .map((blob) => ({
@@ -50,7 +53,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const token = getBlobToken();
+  if (!token) {
     return Response.json({ error: "Vercel Blob no está configurado." }, { status: 503 });
   }
 
@@ -72,6 +76,7 @@ export async function POST(request: Request) {
       access: "public",
       contentType: file.type,
       addRandomSuffix: false,
+      token,
     });
 
     return Response.json({
