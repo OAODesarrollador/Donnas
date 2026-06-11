@@ -27,7 +27,7 @@ const footerImages = [
   "/assets/donut_box_12.png",
   "/assets/donut_box_6.png",
   "/assets/donut_combo.png",
-  "/assets/hero_donuts.png",
+  "/assets/DonutPistachoylimon.webp",
   "/assets/DonnaChocolate.png",
   "/assets/FondoDonnasMenu.jpg",
 ];

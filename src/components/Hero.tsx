@@ -115,8 +115,8 @@ export const Hero: React.FC = () => {
                       src={slide.image}
                       alt={slide.alt}
                       fill
-                      priority={slide.image === heroSlides[0].image}
                       loading={slide.image === heroSlides[0].image ? "eager" : "lazy"}
+                      fetchPriority={slide.image === heroSlides[0].image ? "high" : "auto"}
                       className="object-cover"
                       sizes="(max-width: 1024px) 100vw, 540px"
                     />

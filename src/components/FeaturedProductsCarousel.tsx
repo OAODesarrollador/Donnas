@@ -68,7 +68,7 @@ export const FeaturedProductsCarousel: React.FC<FeaturedProductsCarouselProps> =
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 group-hover:scale-105 [backface-visibility:hidden] [transform:translateZ(0)]"
           sizes="(max-width: 768px) 72vw, 260px"
         />
       );
@@ -99,7 +99,7 @@ export const FeaturedProductsCarousel: React.FC<FeaturedProductsCarouselProps> =
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#FFF8F1]">
+    <section className="relative overflow-hidden bg-transparent">
       <div className="min-w-0">
           <div className="px-5 py-16 sm:px-8 md:px-12 lg:py-20">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[0.34fr_0.66fr] lg:items-center">
@@ -150,16 +150,16 @@ export const FeaturedProductsCarousel: React.FC<FeaturedProductsCarouselProps> =
 
                 <div
                   ref={carouselRef}
-                  className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4"
+                  className="no-scrollbar mobile-carousel-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4"
                 >
                   {featuredProducts.map((product) => (
                     <motion.article
                       key={product.id}
-                      className="group flex w-63 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-brand-cacao/5 bg-white shadow-[0_14px_34px_rgba(42,27,20,0.08)]"
+                      className="group relative isolate flex w-63 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-white/45 bg-white/35 shadow-[0_10px_26px_rgba(42,27,20,0.035)] backdrop-blur-[1px] [backface-visibility:hidden] [contain:layout_paint] [transform:translateZ(0)]"
                       whileHover={{ y: -4 }}
                       transition={{ type: "spring", stiffness: 320, damping: 24 }}
                     >
-                      <div className="relative h-44 overflow-hidden bg-brand-beige/30">
+                      <div className="relative isolate h-44 overflow-hidden rounded-2xl bg-transparent [backface-visibility:hidden] [transform:translateZ(0)]">
                         {renderProductVisual(product)}
                         {product.badge && (
                           <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-brand-cacao shadow-sm">
@@ -225,7 +225,7 @@ export const FeaturedProductsCarousel: React.FC<FeaturedProductsCarouselProps> =
               <div className="relative min-w-0">
                 <div
                   ref={flavorsRef}
-                  className="no-scrollbar flex snap-x snap-mandatory gap-7 overflow-x-auto scroll-smooth pr-12"
+                  className="no-scrollbar mobile-carousel-scroll flex snap-x snap-mandatory gap-7 overflow-x-auto scroll-smooth pr-12"
                 >
                   {flavorGroups.map((flavor) => (
                     <button

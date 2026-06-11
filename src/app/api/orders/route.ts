@@ -10,6 +10,7 @@ interface CreateOrderRequest {
   customerPhone: string;
   deliveryMethod: "pickup" | "delivery";
   deliveryAddress?: string;
+  paymentMethod?: "cash" | "transfer" | "mercado_pago";
   items: OrderRequestItem[];
 }
 
@@ -27,6 +28,12 @@ export async function POST(request: Request) {
 
     if (body.deliveryMethod === "delivery" && !body.deliveryAddress?.trim()) {
       return Response.json({ error: "Falta la dirección de entrega." }, { status: 400 });
+    }
+
+    const paymentMethod = body.paymentMethod ?? "mercado_pago";
+
+    if (!["cash", "transfer", "mercado_pago"].includes(paymentMethod)) {
+      return Response.json({ error: "Forma de pago inválida." }, { status: 400 });
     }
 
     const requestedItems = body.items
@@ -80,9 +87,9 @@ export async function POST(request: Request) {
         deliveryAddress: body.deliveryMethod === "delivery" ? body.deliveryAddress?.trim() : null,
         subtotal,
         total: subtotal,
-        status: "paid_simulated",
-        paymentProvider: "mercado_pago_mock",
-        paymentStatus: "approved",
+        status: "pending",
+        paymentProvider: paymentMethod,
+        paymentStatus: "pending",
         items: {
           create: orderItems,
         },
