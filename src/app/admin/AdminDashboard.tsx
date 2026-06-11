@@ -70,6 +70,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialData }) =
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [blobImages, setBlobImages] = useState<BlobImage[]>([]);
+  const [hasRequestedBlobImages, setHasRequestedBlobImages] = useState(false);
   const [isLoadingBlobImages, setIsLoadingBlobImages] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState("");
@@ -103,6 +104,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialData }) =
   };
 
   const loadBlobImages = useCallback(async () => {
+    setHasRequestedBlobImages(true);
     setIsLoadingBlobImages(true);
     setImageError("");
 
@@ -123,7 +125,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialData }) =
   }, []);
 
   useEffect(() => {
-    if (activeTab === "products" && blobImages.length === 0 && !isLoadingBlobImages) {
+    if (activeTab === "products" && !hasRequestedBlobImages && !isLoadingBlobImages) {
       const frame = window.requestAnimationFrame(() => {
         void loadBlobImages();
       });
@@ -132,7 +134,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialData }) =
     }
 
     return undefined;
-  }, [activeTab, blobImages.length, isLoadingBlobImages, loadBlobImages]);
+  }, [activeTab, hasRequestedBlobImages, isLoadingBlobImages, loadBlobImages]);
 
   const selectEntity = (entity: EditableEntity) => {
     setSelectedId(entity.id);
