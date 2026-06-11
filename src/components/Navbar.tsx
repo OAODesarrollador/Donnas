@@ -57,13 +57,13 @@ export const Navbar: React.FC<NavbarProps> = ({ businessInfo }) => {
             className="object-fill"
           />
         </span>
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl -translate-y-10 items-center justify-between">
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center justify-between md:-translate-y-10">
           {/* Logo Brand */}
           <a href="#" className="flex items-center gap-2 group">
-            <span className="font-serif text-xl md:text-2xl font-bold tracking-tight text-brand-cacao flex items-center gap-1.5">
+            <span className="font-serif text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-1.5 drop-shadow-sm">
               CENTRAL
               <span className="text-brand-pink text-3xl leading-none font-sans font-light select-none">.</span>
-              <span className="font-sans font-normal text-sm tracking-[0.25em] text-brand-hazelnut mt-1">DONUTS</span>
+              <span className="font-sans font-normal text-sm tracking-[0.25em] text-white/85 mt-1">DONUTS</span>
             </span>
           </a>
 
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ businessInfo }) => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-sm font-semibold tracking-wide text-brand-cacao/75 hover:text-brand-cacao transition-colors duration-200 relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-brand-pink after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300"
+                className="relative py-1 text-base font-black tracking-wide text-white drop-shadow-sm transition-colors duration-200 hover:text-brand-pink md:text-lg after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-brand-pink after:transition-transform after:duration-300 hover:after:scale-x-100"
               >
                 {link.name}
               </a>
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({ businessInfo }) => {
             {/* Mobile Actions: Hamburger Icon */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-brand-cacao/90 hover:text-brand-cacao focus:outline-none transition-colors"
+              className="md:hidden p-2 text-white drop-shadow-sm hover:text-brand-pink focus:outline-none transition-colors"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
