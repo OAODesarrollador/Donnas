@@ -17,22 +17,41 @@ export async function GET() {
     return Response.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  const result = await list({ limit: 100 });
-  const images = result.blobs
-    .filter((blob) => isImagePathname(blob.pathname))
-    .map((blob) => ({
-      url: blob.url,
-      pathname: blob.pathname,
-      size: blob.size,
-      uploadedAt: blob.uploadedAt.toISOString(),
-    }));
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return Response.json({
+      images: [],
+      error: "Vercel Blob no está configurado.",
+    });
+  }
 
-  return Response.json({ images });
+  try {
+    const result = await list({ limit: 100 });
+    const images = result.blobs
+      .filter((blob) => isImagePathname(blob.pathname))
+      .map((blob) => ({
+        url: blob.url,
+        pathname: blob.pathname,
+        size: blob.size,
+        uploadedAt: blob.uploadedAt.toISOString(),
+      }));
+
+    return Response.json({ images });
+  } catch (error) {
+    console.error("Error listing Vercel Blob images:", error);
+    return Response.json({
+      images: [],
+      error: "No se pudieron cargar las imágenes de Vercel Blob.",
+    });
+  }
 }
 
 export async function POST(request: Request) {
   if (!(await isAdminSessionValid())) {
     return Response.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return Response.json({ error: "Vercel Blob no está configurado." }, { status: 503 });
   }
 
   const formData = await request.formData();
@@ -48,18 +67,23 @@ export async function POST(request: Request) {
 
   const safeFileName = sanitizeFileName(file.name) || "product-image.jpg";
   const pathname = `products/${Date.now()}-${safeFileName}`;
-  const blob = await put(pathname, file, {
-    access: "public",
-    contentType: file.type,
-    addRandomSuffix: false,
-  });
+  try {
+    const blob = await put(pathname, file, {
+      access: "public",
+      contentType: file.type,
+      addRandomSuffix: false,
+    });
 
-  return Response.json({
-    image: {
-      url: blob.url,
-      pathname: blob.pathname,
-      uploadedAt: new Date().toISOString(),
-      size: file.size,
-    },
-  });
+    return Response.json({
+      image: {
+        url: blob.url,
+        pathname: blob.pathname,
+        uploadedAt: new Date().toISOString(),
+        size: file.size,
+      },
+    });
+  } catch (error) {
+    console.error("Error uploading Vercel Blob image:", error);
+    return Response.json({ error: "No se pudo subir la imagen a Vercel Blob." }, { status: 503 });
+  }
 }
