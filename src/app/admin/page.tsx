@@ -12,20 +12,49 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const [categories, products, promotions, businessInfo, orders] = await Promise.all([
-    db.category.findMany({ orderBy: { sortOrder: "asc" } }),
-    db.product.findMany({
-      include: { category: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }),
-    db.promotion.findMany({ orderBy: { sortOrder: "asc" } }),
-    db.businessInfo.findUnique({ where: { id: "main" } }),
-    db.order.findMany({
-      include: { items: true },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    }),
-  ]);
+  let categories;
+  let products;
+  let promotions;
+  let businessInfo;
+  let orders;
+
+  try {
+    [categories, products, promotions, businessInfo, orders] = await Promise.all([
+      db.category.findMany({ orderBy: { sortOrder: "asc" } }),
+      db.product.findMany({
+        include: { category: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      }),
+      db.promotion.findMany({ orderBy: { sortOrder: "asc" } }),
+      db.businessInfo.findUnique({ where: { id: "main" } }),
+      db.order.findMany({
+        include: { items: true },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+    ]);
+  } catch (error) {
+    console.error("Error loading admin dashboard data:", error);
+
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F5EFE8] px-5 text-brand-cacao">
+        <section className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-sm">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-hazelnut">
+            Administración
+          </p>
+          <h1 className="mt-3 font-serif text-3xl font-black">No se pudo cargar el panel</h1>
+          <p className="mt-4 text-sm font-semibold leading-6 text-brand-cacao/70">
+            Revisá que Vercel tenga configurada la variable DATABASE_URL y que la base remota tenga
+            el esquema creado con Prisma.
+          </p>
+          <p className="mt-4 rounded-xl bg-brand-cream px-4 py-3 text-xs font-bold text-brand-cacao/65">
+            En producción, los detalles técnicos quedan en los logs de Vercel para no exponer datos
+            sensibles.
+          </p>
+        </section>
+      </main>
+    );
+  }
 
   const data: AdminDashboardData = {
     categories: categories.map((category) => ({
